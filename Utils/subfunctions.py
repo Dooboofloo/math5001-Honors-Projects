@@ -217,6 +217,34 @@ class FunctionSpace:
         for t in np.linspace(-1, 1, num, endpoint=True):
             output.append(self.lintegral(theta, t, step))
         return output
+    
+    def show(self, angle=0):
+        resolution = 256
+
+        plt.style.use('_mpl-gallery-nogrid')
+
+        X, Y = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-1, 1, resolution))
+        Z = []
+        for x in range(resolution):
+            row = []
+            for y in range(resolution):
+                row.append(self.get(X[x,y], Y[x,y]))
+            Z.append(row)
+        
+        levels = np.linspace(np.min(Z), np.max(Z), len(self.subfunctions) + 2)
+
+        fig, (fx, rx) = plt.subplots(1, 2)
+        fx.contourf(X, Y, Z, levels=levels)
+
+        fx.set_aspect('equal')
+
+        radon_res = 128
+        rx.set_ylim([0, 1])
+        rx.plot(np.linspace(-1, 1, radon_res), self.radon(angle, radon_res))
+
+        plt.show()
+
+
 
 ######## TEST IMAGES ########
 class LoganShepp(FunctionSpace):
