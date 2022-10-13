@@ -3,6 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import SymLogNorm
 
 
 
@@ -110,7 +111,7 @@ class Ellipse(Subfunction):
 
     def __init__(self, posX: float, posY: float, w: float, h: float, theta: float, value: float = 0):
         
-        self.condition = lambda x,y: pow(((x-posX) * np.cos(theta) + (y-posY) * np.sin(theta)) / w, 2) + pow((y-posY) * np.cos(theta) - (x-posX) * np.sin(theta) / h, 2) <= 1
+        self.condition = lambda x,y: pow(((x-posX) * np.cos(theta) + (y-posY) * np.sin(theta)) / w, 2) + pow(((y-posY) * np.cos(theta) - (x-posX) * np.sin(theta)) / h, 2) <= 1
         self.value = value
 
 class Rect(Subfunction):
@@ -138,8 +139,11 @@ class FunctionSpace:
               where (num) is the number of samples along the line and (step) is the step size
               of lintegral
 
-        > show(theta):
-            - Shows a pretty picture of the subfunction and its Radon transform at a given angle (theta)
+        > showRadon(theta):
+            - Shows a pretty picture of the FunctionSpace and its Radon transform at a given angle (theta)
+        
+        > show():
+            - Shows a pretty picture of the FunctionSpace
     '''
 
     def __init__(self, subfunc_list = []):
@@ -152,21 +156,6 @@ class FunctionSpace:
 
         self.subfunctions.append(subfunc)
     
-    # def get(self, x: float, y: float) -> float:
-    #     '''Get the value of the FunctionSpace at (x,y).
-    #         If no subfunctions are defined at (x,y), returns 0.
-    #     '''
-
-    #     for subfunc in self.subfunctions:
-    #         val = subfunc.get(x, y)
-
-    #         # If function is defined here, return the value
-    #         if val is not None:
-    #             return val
-        
-    #     # Else return 0
-    #     return 0
-
     def get(self, x: float, y: float) -> float:
         '''Get the value of the FunctionSpace at (x,y).
             The value at (x,y) is the sum of all subfunctions defined at (x,y)
@@ -218,10 +207,10 @@ class FunctionSpace:
             output.append(self.lintegral(theta, t, step))
         return output
     
-    def show(self, angle=0):
+    def showRadon(self, theta=0):
         resolution = 256
 
-        plt.style.use('_mpl-gallery-nogrid')
+        # plt.style.use('_mpl-gallery-nogrid')
 
         X, Y = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-1, 1, resolution))
         Z = []
@@ -233,21 +222,42 @@ class FunctionSpace:
         
         levels = np.linspace(np.min(Z), np.max(Z), len(self.subfunctions) + 2)
 
-        fig, (fx, rx) = plt.subplots(1, 2)
-        fx.contourf(X, Y, Z, levels=levels)
+        _, (fx, rx) = plt.subplots(1, 2)
+        # fx.contourf(X, Y, Z, levels=levels)
 
-        fx.set_aspect('equal')
+        fx.imshow(Z, origin='lower', extent=[-1.0,1.0,-1.0,1.0], aspect='equal', cmap='gray')
 
         radon_res = 128
-        rx.set_ylim([0, 1])
-        rx.plot(np.linspace(-1, 1, radon_res), self.radon(angle, radon_res))
+        # rx.set_ylim([0, 1])
+        rx.plot(np.linspace(-1, 1, radon_res), self.radon(theta, radon_res))
+
+        plt.show()
+    
+    def show(self):
+        resolution = 256
+
+        # plt.style.use('_mpl-gallery-nogrid')
+
+        X, Y = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-1, 1, resolution))
+        Z = []
+        
+        for x in range(resolution):
+            row = []
+            for y in range(resolution):
+                row.append(self.get(X[x,y], Y[x,y]))
+            Z.append(row)
+        
+        _, ax = plt.subplots()
+        
+        ax.imshow(Z, origin='lower', extent=[-1.0,1.0,-1.0,1.0], aspect='equal')
 
         plt.show()
 
 
 
 ######## TEST IMAGES ########
-class LoganShepp(FunctionSpace):
+
+class SheppLogan(FunctionSpace):
     '''https://en.wikipedia.org/wiki/Shepp%E2%80%93Logan_phantom
        A representation of the Logan-Shepp phantom, used to approximate the shape of the human head.
     '''
@@ -258,15 +268,16 @@ class LoganShepp(FunctionSpace):
         pi = np.pi
 
         a = Ellipse(    0,       0,   0.69,  0.92,        0,     2)
+        b = Ellipse(    0,       0,  0.345,  0.46,        0,     2)
         b = Ellipse(    0, -0.0184, 0.6624, 0.874,        0, -0.98)
-        c = Ellipse( 0.22,       0,   0.11,  0.31,  pi / 10, -0.02)
-        d = Ellipse(-0.22,       0,   0.16,  0.41, -pi / 10, -0.02)
-        e = Ellipse(    0,    0.35,   0.21,  0.25,        0,  0.01)
-        f = Ellipse(    0,     0.1,  0.046, 0.046,        0,  0.01)
-        g = Ellipse(    0,    -0.1,  0.046, 0.046,        0,  0.01)
-        h = Ellipse(-0.08,  -0.605,  0.046, 0.023,        0,  0.01)
-        i = Ellipse(    0,  -0.605,  0.023, 0.023,        0,  0.01)
-        j = Ellipse( 0.06,  -0.605,  0.025, 0.046,        0,  0.01)
+        c = Ellipse( 0.22,       0,   0.11,  0.31, -pi / 10, -0.2)
+        d = Ellipse(-0.22,       0,   0.16,  0.41,  pi / 10, -0.2)
+        e = Ellipse(    0,    0.35,   0.21,  0.25,        0,  0.1)
+        f = Ellipse(    0,     0.1,  0.046, 0.046,        0,  0.1)
+        g = Ellipse(    0,    -0.1,  0.046, 0.046,        0,  0.1)
+        h = Ellipse(-0.08,  -0.605,  0.046, 0.023,        0,  0.1)
+        i = Ellipse(    0,  -0.605,  0.023, 0.023,        0,  0.1)
+        j = Ellipse( 0.06,  -0.605,  0.025, 0.046,        0,  0.1)
 
         self.subfunctions = [a,b,c,d,e,f,g,h,i,j]
         
