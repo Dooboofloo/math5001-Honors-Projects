@@ -3,7 +3,6 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import SymLogNorm
 
 
 
@@ -207,8 +206,7 @@ class FunctionSpace:
             output.append(self.lintegral(theta, t, step))
         return output
     
-    def showRadon(self, theta=0):
-        resolution = 256
+    def showRadon(self, theta=0, resolution=256):
 
         # plt.style.use('_mpl-gallery-nogrid')
 
@@ -233,8 +231,7 @@ class FunctionSpace:
 
         plt.show()
     
-    def show(self):
-        resolution = 256
+    def show(self, resolution = 256):
 
         # plt.style.use('_mpl-gallery-nogrid')
 
@@ -250,12 +247,24 @@ class FunctionSpace:
         _, ax = plt.subplots()
         
         ax.imshow(Z, origin='lower', extent=[-1.0,1.0,-1.0,1.0], aspect='equal')
+        # ax.imshow(Z, origin='lower', extent=[-1.0,1.0,-1.0,1.0], aspect='equal', cmap='gray')
 
         plt.show()
+    
+    def exportRadon(self, output='radon.csv'):
+        with open(output, 'w') as f:
+            # Calculate radon data from 0 to 180 degrees, with a spacing of 2 degrees
+            for theta in np.linspace(0, np.pi, 90):
+                rowRadon = self.radon(theta, num=50, step=0.01)
+                for i in range(len(rowRadon) - 1):
+                    f.write(str(round(rowRadon[i], 5)))
+                    f.write(',')
+                f.write(str(round(rowRadon[-1], 5)))
+                f.write('\n')
 
 
 
-######## TEST IMAGES ########
+######## TEST PHANTOMS ########
 
 class SheppLogan(FunctionSpace):
     '''https://en.wikipedia.org/wiki/Shepp%E2%80%93Logan_phantom
