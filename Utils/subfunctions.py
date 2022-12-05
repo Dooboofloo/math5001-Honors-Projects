@@ -251,10 +251,10 @@ class FunctionSpace:
 
         plt.show()
     
-    def exportRadon(self, output='radon.csv'):
+    def exportRadon(self, output='radon.csv', numSamples=90):
         with open(output, 'w') as f:
             # Calculate radon data from 0 to 180 degrees, with a spacing of 2 degrees
-            for theta in np.linspace(0, np.pi, 90):
+            for theta in np.linspace(0, np.pi, numSamples):
                 rowRadon = self.radon(theta, num=50, step=0.01)
                 for i in range(len(rowRadon) - 1):
                     f.write(str(round(rowRadon[i], 5)))
