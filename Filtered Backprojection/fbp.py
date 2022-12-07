@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.fftpack import fft, fftshift, ifft
 
 def arange2(start, stop=None, step=1):
-    """#Modified version of numpy.arange which corrects error associated with non-integer step size"""
+    """Modified version of numpy.arange which corrects error associated with non-integer step size"""
     if stop == None:
         a = np.arange(start)
     else: 
@@ -67,7 +67,7 @@ def backproject(radon):
         projMatrix[m0, m1] = s[XrotCor[m0, m1]] # backproject in-bounds data
         reconMatrix += projMatrix # add data to reconMatrix
     
-    return np.fliplr(np.rot90(reconMatrix))
+    return np.fliplr(np.rot90(reconMatrix / (2 * np.pi)))
 
 def fbp(radon):
     filteredRadon = applyFilter(radon)
@@ -77,20 +77,30 @@ def fbp(radon):
 
 if __name__ == '__main__':
     # Load original image (for comparison)
-    # inputImg = np.loadtxt('./image/image1.csv', delimiter=',')
-    inputImg = np.loadtxt('./image/image1.csv', delimiter=',')
+    inputImg = np.loadtxt('./image/SheppLoganImage.csv', delimiter=',')
     # Load previously computed radon data
-    # inputRadon = np.loadtxt('./radon/radon1.csv', delimiter=',')
     inputRadon = np.loadtxt('./radon/SheppLoganRadon.csv', delimiter=',')
     
-    _, (ax1, ax2) = plt.subplots(1, 2)
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+
+    recovered = fbp(inputRadon)
 
     ax1.imshow(inputImg)
-    ax2.imshow(fbp(inputRadon))
+    ax2.imshow(recovered)
+    ax3.imshow(inputImg - recovered)
 
     ax1.set_title('Original')
     ax2.set_title('FBP')
+    ax3.set_title('Error')
+
+    ax1.set_axis_off()
+    ax2.set_axis_off()
+    ax3.set_axis_off()
+
+    fig.suptitle('Shepp-Logan Phantom')
     
+    # plt.savefig('SheppLoganFBP.png', dpi=800)
+
     plt.show()
 
     # below was stuff for machine learning project
@@ -105,6 +115,10 @@ if __name__ == '__main__':
     #     ax1.imshow(np.flipud(inputImg))
     #     ax2.imshow( np.flipud(backproject(inputRadon)) )
     #     ax3.imshow( np.flipud(fbp(inputRadon)) )
+
+    #     ax1.set_axis_off()
+    #     ax2.set_axis_off()
+    #     ax3.set_axis_off()
 
     #     ax1.set_title('Original')
     #     ax2.set_title('Unfiltered BP')
