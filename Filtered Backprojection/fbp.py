@@ -77,9 +77,11 @@ def fbp(radon):
 
 if __name__ == '__main__':
     # Load original image (for comparison)
-    inputImg = np.loadtxt('./image/SheppLoganImage.csv', delimiter=',')
+    # inputImg = np.loadtxt('./image/SheppLoganImage.csv', delimiter=',')
+    inputImg = np.loadtxt('./image/SmileImage.csv', delimiter=',')
     # Load previously computed radon data
-    inputRadon = np.loadtxt('./radon/SheppLoganRadon.csv', delimiter=',')
+    # inputRadon = np.loadtxt('./radon/SheppLoganRadon.csv', delimiter=',')
+    inputRadon = np.loadtxt('./radon/SmileRadon.csv', delimiter=',')
     
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
 
@@ -97,11 +99,11 @@ if __name__ == '__main__':
     ax2.set_axis_off()
     ax3.set_axis_off()
 
-    fig.suptitle('Shepp-Logan Phantom')
+    # fig.suptitle('Shepp-Logan Phantom')
     
-    # plt.savefig('SheppLoganFBP.png', dpi=800)
+    plt.savefig('SmileFBP.png', dpi=800)
 
-    plt.show()
+    # plt.show()
 
     # below was stuff for machine learning project
     # for i in range(991, 1001):

@@ -251,11 +251,11 @@ class FunctionSpace:
 
         plt.show()
     
-    def exportRadon(self, output='radon.csv', numSamples=90):
+    def exportRadon(self, output='radon.csv', numAngles=90, numSamples=50):
         with open(output, 'w') as f:
             # Calculate radon data from 0 to 180 degrees, with a spacing of 2 degrees
-            for theta in np.linspace(0, np.pi, numSamples):
-                rowRadon = self.radon(theta, num=50, step=0.01)
+            for theta in np.linspace(0, np.pi, numAngles):
+                rowRadon = self.radon(theta, num=numSamples, step=0.01)
                 for i in range(len(rowRadon) - 1):
                     f.write(str(round(rowRadon[i], 5)))
                     f.write(',')
@@ -290,4 +290,20 @@ class SheppLogan(FunctionSpace):
 
         self.subfunctions = [a,b,c,d,e,f,g,h,i,j]
         
+class Smile(FunctionSpace):
+    '''A smile! :)
+    '''
 
+    def __init__(self):
+        lEye = Ellipse(-0.27, 0.43, 0.125, 0.3, 0, 1)
+        rEye = Ellipse( 0.27, 0.43, 0.125, 0.3, 0, 1)
+
+        nose = Rect(0, -0.05, 0.1, 0.1, np.pi/4, 0.75)
+
+        mouth1 = Circle(-0.44,  -0.23, 0.1, 0.5)
+        mouth2 = Circle(-0.25, -0.43, 0.1, 0.4)
+        mouth3 = Circle(    0,  -0.53, 0.1, 0.3)
+        mouth4 = Circle( 0.25, -0.43, 0.1, 0.4)
+        mouth5 = Circle( 0.44,  -0.23, 0.1, 0.5)
+
+        self.subfunctions = [lEye, rEye, nose, mouth1, mouth2, mouth3, mouth4, mouth5]
