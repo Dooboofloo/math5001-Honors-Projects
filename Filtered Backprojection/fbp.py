@@ -98,12 +98,10 @@ if __name__ == '__main__':
     ax1.set_axis_off()
     ax2.set_axis_off()
     ax3.set_axis_off()
-
-    # fig.suptitle('Shepp-Logan Phantom')
     
-    plt.savefig('SmileFBP.png', dpi=800)
+    # plt.savefig('SmileFBP.png', dpi=800)
 
-    # plt.show()
+    plt.show()
 
     # below was stuff for machine learning project
     # for i in range(991, 1001):

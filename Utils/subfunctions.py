@@ -217,16 +217,12 @@ class FunctionSpace:
             for y in range(resolution):
                 row.append(self.get(X[x,y], Y[x,y]))
             Z.append(row)
-        
-        levels = np.linspace(np.min(Z), np.max(Z), len(self.subfunctions) + 2)
 
         _, (fx, rx) = plt.subplots(1, 2)
-        # fx.contourf(X, Y, Z, levels=levels)
 
         fx.imshow(Z, origin='lower', extent=[-1.0,1.0,-1.0,1.0], aspect='equal', cmap='gray')
 
         radon_res = 128
-        # rx.set_ylim([0, 1])
         rx.plot(np.linspace(-1, 1, radon_res), self.radon(theta, radon_res))
 
         plt.show()
