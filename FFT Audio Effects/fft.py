@@ -15,7 +15,7 @@ def sine_wave(freq, duration):
     return y
 
 def noise(duration):
-    '''Produces noise'''
+    '''Produces noise of specified duration'''
     y = np.random.random(SAMPLE_RATE * duration)
     return y
     
@@ -23,6 +23,8 @@ def noise(duration):
 # FILTERS
 
 def hipass(audio, cutoffFreq, smoothing = 0.01):
+    '''Applies a high-pass filter to audio'''
+
     if len(audio.shape) == 2: # if audio is stereo
         # Apply filter separately to each channel
         r = np.zeros(audio.shape)
@@ -39,6 +41,8 @@ def hipass(audio, cutoffFreq, smoothing = 0.01):
     return irfft(yf)
 
 def lowpass(audio, cutoffFreq, smoothing = 0.01):
+    '''Applies a low-pass filter to audio'''
+
     if len(audio.shape) == 2: # if audio is stereo
         # Apply filter separately to each channel
         r = np.zeros(audio.shape)
@@ -55,6 +59,8 @@ def lowpass(audio, cutoffFreq, smoothing = 0.01):
     return irfft(yf)
 
 def bandpass(audio, centerFreq, smoothing = 100):
+    '''Applies a band-pass filter to audio'''
+
     if len(audio.shape) == 2: # if audio is stereo
         # Apply filter separately to each channel
         r = np.zeros(audio.shape)
@@ -71,6 +77,8 @@ def bandpass(audio, centerFreq, smoothing = 100):
     return irfft(yf)
 
 def bandstop(audio, centerFreq, smoothing = 100, distance = 200):
+    '''Applies a band-stop filter to audio'''
+
     if len(audio.shape) == 2: # if audio is stereo
         # Apply filter separately to each channel
         r = np.zeros(audio.shape)
@@ -102,26 +110,3 @@ if __name__ == '__main__':
     guitar = bandstop(guitar, 1300, 50, 900)
 
     write("bandstop_guitar_1500hz_50_800.wav", guitarSampleRate, normalize(guitar))
-
-    # n = noise(duration)
-    # fn = bandstop(n, 4000, 100, 2000)
-
-    # yn = rfft(n)
-    # xn = rfftfreq(SAMPLE_RATE * duration, 1 / SAMPLE_RATE)
-
-    # yfn = rfft(fn)
-
-    # write("noise.wav", SAMPLE_RATE, normalize(n))
-    # write("bandpass.wav", SAMPLE_RATE, normalize(fn))
-
-    # fig, (ax1, ax2) = plt.subplots(1, 2)
-
-    # ax1.plot(xn[1:], np.abs(yn)[1:])
-    # ax2.plot(xn[1:], np.abs(yfn)[1:])
-    
-    # ax1.set_title("Random Noise")
-    # ax2.set_title("Bandstop (freq=4000, smoothing=100, distance=2000)")
-
-    # fig.suptitle("Noise vs Bandstop")
-
-    # plt.show()
