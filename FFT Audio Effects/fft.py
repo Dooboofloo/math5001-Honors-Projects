@@ -97,16 +97,14 @@ def bandstop(audio, centerFreq, smoothing = 100, distance = 200):
 # Utility
 
 def normalize(audio):
-    '''Normalizes audio to 16-bit integer format'''
+    '''Normalizes audio to 16-bit integer format for saving'''
     return np.int16((audio / audio.max()) * 32767)
 
 
 
 if __name__ == '__main__':
-    duration = 5
+    audioSampleRate, audio = read("./input/Guitar.wav")
 
-    guitarSampleRate, guitar = read("./input/Guitar.wav")
+    audio = lowpass(audio, 1300, 50, 900)
 
-    guitar = bandstop(guitar, 1300, 50, 900)
-
-    write("bandstop_guitar_1500hz_50_800.wav", guitarSampleRate, normalize(guitar))
+    write("bandstop_guitar_1300hz_50_900.wav", audioSampleRate, normalize(audio))
