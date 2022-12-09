@@ -47,10 +47,8 @@ if __name__ == '__main__':
 
     # The measurement matrix
     # shape: (m × n) = (numAngles * numSamples × numAngles^2)
-    # A = genMeasureMat(m, n)
-    # np.savetxt('mm45x50.csv', A, delimiter=',')
-    A = np.loadtxt('mm45x50.csv', delimiter=',')
-    # A = np.loadtxt('mm90x50.csv', delimiter=',')
+    A = genMeasureMat(m, n)
+    # A = np.loadtxt('mm45x50.csv', delimiter=',')
 
     # coefficient matrix (unknowns)
     # to become output image
