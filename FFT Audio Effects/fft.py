@@ -23,6 +23,13 @@ def noise(duration):
 # FILTERS
 
 def hipass(audio, cutoffFreq, smoothing = 0.01):
+    if len(audio.shape) == 2: # if audio is stereo
+        # Apply filter separately to each channel
+        r = np.zeros(audio.shape)
+        r[:,0] = hipass(audio[:,0], cutoffFreq, smoothing)
+        r[:,1] = hipass(audio[:,1], cutoffFreq, smoothing)
+        return r
+
     yf = rfft(audio)
     xf = rfftfreq(len(audio), 1 / SAMPLE_RATE)
 
@@ -32,6 +39,13 @@ def hipass(audio, cutoffFreq, smoothing = 0.01):
     return irfft(yf)
 
 def lowpass(audio, cutoffFreq, smoothing = 0.01):
+    if len(audio.shape) == 2: # if audio is stereo
+        # Apply filter separately to each channel
+        r = np.zeros(audio.shape)
+        r[:,0] = lowpass(audio[:,0], cutoffFreq, smoothing)
+        r[:,1] = lowpass(audio[:,1], cutoffFreq, smoothing)
+        return r
+
     yf = rfft(audio)
     xf = rfftfreq(len(audio), 1 / SAMPLE_RATE)
 
@@ -41,6 +55,13 @@ def lowpass(audio, cutoffFreq, smoothing = 0.01):
     return irfft(yf)
 
 def bandpass(audio, centerFreq, smoothing = 100):
+    if len(audio.shape) == 2: # if audio is stereo
+        # Apply filter separately to each channel
+        r = np.zeros(audio.shape)
+        r[:,0] = bandpass(audio[:,0], centerFreq, smoothing)
+        r[:,1] = bandpass(audio[:,1], centerFreq, smoothing)
+        return r
+
     yf = rfft(audio)
     xf = rfftfreq(len(audio), 1 / SAMPLE_RATE)
 
@@ -49,7 +70,14 @@ def bandpass(audio, centerFreq, smoothing = 100):
 
     return irfft(yf)
 
-def bandstop(audio, centerFreq, smoothing = 100, distance = 4):
+def bandstop(audio, centerFreq, smoothing = 100, distance = 200):
+    if len(audio.shape) == 2: # if audio is stereo
+        # Apply filter separately to each channel
+        r = np.zeros(audio.shape)
+        r[:,0] = bandstop(audio[:,0], centerFreq, smoothing, distance)
+        r[:,1] = bandstop(audio[:,1], centerFreq, smoothing, distance)
+        return r
+
     yf = rfft(audio)
     xf = rfftfreq(len(audio), 1 / SAMPLE_RATE)
 
@@ -58,35 +86,42 @@ def bandstop(audio, centerFreq, smoothing = 100, distance = 4):
     
     return irfft(yf)
 
+# Utility
+
 def normalize(audio):
     '''Normalizes audio to 16-bit integer format'''
     return np.int16((audio / audio.max()) * 32767)
 
+
+
 if __name__ == '__main__':
     duration = 5
 
-    # ex_tone = sine_wave(440, duration)
-    # higher = sine_wave(554.3653, duration)
+    guitarSampleRate, guitar = read("./input/Guitar.wav")
 
-    n = noise(duration)
-    fn = bandstop(n, 4000, 100, 2000)
+    guitar = bandstop(guitar, 1300, 50, 900)
 
-    yn = rfft(n)
-    xn = rfftfreq(SAMPLE_RATE * duration, 1 / SAMPLE_RATE)
+    write("bandstop_guitar_1500hz_50_800.wav", guitarSampleRate, normalize(guitar))
 
-    yfn = rfft(fn)
+    # n = noise(duration)
+    # fn = bandstop(n, 4000, 100, 2000)
 
-    write("noise.wav", SAMPLE_RATE, normalize(n))
-    write("bandpass.wav", SAMPLE_RATE, normalize(fn))
+    # yn = rfft(n)
+    # xn = rfftfreq(SAMPLE_RATE * duration, 1 / SAMPLE_RATE)
 
-    fig, (ax1, ax2) = plt.subplots(1, 2)
+    # yfn = rfft(fn)
 
-    ax1.plot(xn[1:], np.abs(yn)[1:])
-    ax2.plot(xn[1:], np.abs(yfn)[1:])
+    # write("noise.wav", SAMPLE_RATE, normalize(n))
+    # write("bandpass.wav", SAMPLE_RATE, normalize(fn))
+
+    # fig, (ax1, ax2) = plt.subplots(1, 2)
+
+    # ax1.plot(xn[1:], np.abs(yn)[1:])
+    # ax2.plot(xn[1:], np.abs(yfn)[1:])
     
-    ax1.set_title("Random Noise")
-    ax2.set_title("Bandstop (freq=4000, smoothing=100, distance=2000)")
+    # ax1.set_title("Random Noise")
+    # ax2.set_title("Bandstop (freq=4000, smoothing=100, distance=2000)")
 
-    fig.suptitle("Noise vs Bandstop")
+    # fig.suptitle("Noise vs Bandstop")
 
-    plt.show()
+    # plt.show()
