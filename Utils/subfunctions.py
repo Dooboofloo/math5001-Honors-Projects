@@ -220,7 +220,7 @@ class FunctionSpace:
 
         _, (fx, rx) = plt.subplots(1, 2)
 
-        fx.imshow(Z, origin='lower', extent=[-1.0,1.0,-1.0,1.0], aspect='equal', cmap='gray')
+        fx.imshow(Z, origin='lower', extent=[-1.0,1.0,-1.0,1.0], aspect='equal')
 
         radon_res = 128
         rx.plot(np.linspace(-1, 1, radon_res), self.radon(theta, radon_res))

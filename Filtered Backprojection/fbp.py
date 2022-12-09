@@ -44,6 +44,8 @@ def backproject(radon):
     theta = np.linspace(0, 180, np.shape(inputRadon)[0], endpoint=False)
 
     imageLen = radon.shape[1]
+
+    # The matrix to become the reconstructed image
     reconMatrix = np.zeros((imageLen, imageLen))
 
     x = np.arange(imageLen) - (imageLen / 2) # shift coordinates to be centered at (0, 0)
@@ -59,6 +61,7 @@ def backproject(radon):
         XrotCor = np.round( Xrot + imageLen / 2 ) # correct back to centered coordinate system
         XrotCor = XrotCor.astype('int') # convert all entries to integers
 
+        # Initialze projection matrix
         projMatrix = np.zeros((imageLen, imageLen))
 
         m0, m1 = np.where( (XrotCor >= 0) & (XrotCor < imageLen) ) # Cut off bits of the image outside of the border
