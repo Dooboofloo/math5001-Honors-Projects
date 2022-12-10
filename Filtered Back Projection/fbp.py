@@ -8,16 +8,18 @@ def applyFilter(radon):
     numAngles, numSamples = radon.shape
 
     w = np.linspace(-np.pi, np.pi, numSamples)
-
     r = abs(w) # ramp filter
 
-    filt = fftshift(r) # filt should be approximately abs(w)
-    filtRadon = np.zeros((numAngles, numSamples))
+    filt = fftshift(r) # prepare filter
 
+    filtRadon = np.zeros((numAngles, numSamples))
     for i in range(numAngles):
-        projfft = fft(radon[i])
-        filtProj = projfft * filt # filter radon data row by row
-        filtRadon[i] = np.real(ifft(filtProj)) # discard complex part and add it to filtRadon
+        # filter radon data row by row
+        projfft = fft(radon[i]) # Fourier Transform
+
+        filtProj = projfft * filt # Convolution Theorem!
+
+        filtRadon[i] = np.real(ifft(filtProj)) # discard complex part of inverse FFT and add it to filtRadon
     
     return filtRadon
 
