@@ -173,9 +173,9 @@ class FunctionSpace:
         return valSum
     
     def lintegral(self, theta=0, dist=0, step=0.005):
-        '''Calculates the Radon transform of the subfunction at a given angle (theta),
-            where (num) is the number of samples along the line and (step) is the step size
-            of lintegral
+        '''Calculates a line integral of the line parameterized by (dist, theta) with a step size of (step).
+
+            Returns a value
         '''
 
         dir = Vec2(np.cos(theta), np.sin(theta))
@@ -207,8 +207,6 @@ class FunctionSpace:
         return output
     
     def showRadon(self, theta=0, resolution=256):
-
-        # plt.style.use('_mpl-gallery-nogrid')
 
         X, Y = np.meshgrid(np.linspace(-1, 1, resolution), np.linspace(-1, 1, resolution))
         Z = []
@@ -243,7 +241,6 @@ class FunctionSpace:
         _, ax = plt.subplots()
         
         ax.imshow(Z, origin='lower', extent=[-1.0,1.0,-1.0,1.0], aspect='equal')
-        # ax.imshow(Z, origin='lower', extent=[-1.0,1.0,-1.0,1.0], aspect='equal', cmap='gray')
 
         plt.show()
     
