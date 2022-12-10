@@ -41,14 +41,14 @@ def radonFilter(r, g, b):
 if __name__ == '__main__':
     os.system('color')
 
-    RESOLUTION = 512
+    RESOLUTION = 128
 
     # Options
-    saveImages = True
-    savePlot = True
+    saveImages = False
+    savePlot = False
     showPlot = True
 
-    filterRadon = False
+    filterRadon = True
 
 
     # ===== READ IN IMAGE =====

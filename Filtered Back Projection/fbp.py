@@ -25,25 +25,21 @@ def applyFilter(radon):
 
 def backproject(radon):
     '''Project sinogram back onto the image plane'''
+    
+    numAngles, imageLen = radon.shape
 
     # Theta values each row of inputRadon corresponds to
-    theta = np.linspace(0, 180, np.shape(inputRadon)[0], endpoint=True)
-
-    imageLen = radon.shape[1]
+    theta = np.linspace(0, np.pi, numAngles, endpoint=True)
 
     # The matrix to become the reconstructed image
     reconMatrix = np.zeros((imageLen, imageLen))
 
     # Shift coordinates to be centered at (0, 0)
-    # Set up 2D grid
     x = np.arange(imageLen) - (imageLen / 2)
     y = x.copy()
-    X, Y = np.meshgrid(x, y)
+    X, Y = np.meshgrid(x, y)  # Set up 2D grid
 
-    # Convert theta from degrees to rads
-    theta = theta * np.pi / 180
-    numAngles = len(theta)
-
+    # Back Projection
     for n in range(numAngles):
         Xrot = X * np.sin(theta[n]) - Y * np.cos(theta[n]) # rotate
         XrotCor = np.round( Xrot + imageLen / 2 ) # correct back to centered coordinate system
@@ -53,9 +49,8 @@ def backproject(radon):
         projMatrix = np.zeros((imageLen, imageLen))
 
         m0, m1 = np.where( (XrotCor >= 0) & (XrotCor < imageLen) ) # Cut off bits of the image outside of the border
-        s = radon[n]
 
-        projMatrix[m0, m1] = s[XrotCor[m0, m1]] # backproject in-bounds data
+        projMatrix[m0, m1] = radon[n][XrotCor[m0, m1]] # backproject in-bounds data
         reconMatrix += projMatrix # add data to reconMatrix
     
     # Normalize reconstruction matrix
@@ -73,15 +68,15 @@ def fbp(radon):
 
 if __name__ == '__main__':
     # Load original image (for comparison)
-    # inputImg = np.loadtxt('./image/squareImage.csv', delimiter=',')
-    inputImg = np.loadtxt('./image/SmileImage.csv', delimiter=',')
+    inputImg = np.loadtxt('./image/squareImage.csv', delimiter=',')
+    # inputImg = np.loadtxt('./image/SmileImage.csv', delimiter=',')
 
     # Normalize it
     inputImg = (inputImg - inputImg.min()) / (inputImg.max() - inputImg.min())
 
     # Load previously computed radon data
-    # inputRadon = np.loadtxt('./radon/squareRadon.csv', delimiter=',')
-    inputRadon = np.loadtxt('./radon/SmileRadon.csv', delimiter=',')
+    inputRadon = np.loadtxt('./radon/squareRadon.csv', delimiter=',')
+    # inputRadon = np.loadtxt('./radon/SmileRadon.csv', delimiter=',')
 
 
     # Filter and Back Project
@@ -90,6 +85,7 @@ if __name__ == '__main__':
 
     # Plot
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
+    # fig, (ax1, ax2) = plt.subplots(1, 2)
 
     ax1.imshow(inputImg)
     ax2.imshow(recovered)
