@@ -25,7 +25,7 @@ def backproject(radon):
     '''Project sinogram back onto the image plane'''
 
     # Theta values each row of inputRadon corresponds to
-    theta = np.linspace(0, 180, np.shape(inputRadon)[0], endpoint=False)
+    theta = np.linspace(0, 180, np.shape(inputRadon)[0], endpoint=True)
 
     imageLen = radon.shape[1]
 
@@ -56,8 +56,11 @@ def backproject(radon):
         projMatrix[m0, m1] = s[XrotCor[m0, m1]] # backproject in-bounds data
         reconMatrix += projMatrix # add data to reconMatrix
     
+    # Normalize reconstruction matrix
+    reconMatrix = (reconMatrix - reconMatrix.min()) / (reconMatrix.max() - reconMatrix.min())
+
     # return normalized reconstruction matrix and flip it to correct orientation
-    return np.fliplr(np.rot90(reconMatrix / (2 * np.pi)))
+    return np.fliplr(np.rot90(reconMatrix))
 
 def fbp(radon):
     # Filter then backproject
@@ -68,10 +71,16 @@ def fbp(radon):
 
 if __name__ == '__main__':
     # Load original image (for comparison)
+    # inputImg = np.loadtxt('./image/squareImage.csv', delimiter=',')
     inputImg = np.loadtxt('./image/SmileImage.csv', delimiter=',')
 
+    # Normalize it
+    inputImg = (inputImg - inputImg.min()) / (inputImg.max() - inputImg.min())
+
     # Load previously computed radon data
+    # inputRadon = np.loadtxt('./radon/squareRadon.csv', delimiter=',')
     inputRadon = np.loadtxt('./radon/SmileRadon.csv', delimiter=',')
+
 
     # Filter and Back Project
     recovered = fbp(inputRadon)
