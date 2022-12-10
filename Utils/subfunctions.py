@@ -254,6 +254,20 @@ class FunctionSpace:
                     f.write(',')
                 f.write(str(round(rowRadon[-1], 5)))
                 f.write('\n')
+    
+    def exportImage(self, output='image.csv', width=32):
+        with open(output, 'w') as f:
+            offset = ((width - 1) / width)
+            halfWidth = width / 2
+            for pixelY in range(width):
+                fsY = offset - (pixelY / halfWidth)
+                for pixelX in range(width - 1):
+                    fsX = (pixelX / halfWidth) - offset
+
+                    f.write(str(self.get(fsX, fsY)))
+                    f.write(',')
+                f.write(str(self.get(offset, fsY)))
+                f.write('\n')
 
 
 
