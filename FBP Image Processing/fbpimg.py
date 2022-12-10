@@ -3,7 +3,7 @@ import imageio.v3 as iio
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from skimage.transform import radon, iradon, rescale
-import os
+import os, sys
 
 def normalize(input):
     return (input - input.min()) / (input.max() - input.min())
@@ -28,20 +28,35 @@ def toColor(input, color):
     return output.astype(np.uint8)
     
 
+# Method for playing with filters
+def radonFilter(r, g, b):
+    r = np.flipud(r)
+    g = np.flipud(g)
+    b = np.flipud(b)
+            
+    return r, g, b
 
 # All images in ./input/ are 3024x3024
 
 if __name__ == '__main__':
     os.system('color')
 
-    RESOLUTION = 128
-    saveImages = False
-    showPlot = True
+    RESOLUTION = 512
+
+    # Options
+    saveImages = True
     savePlot = True
+    showPlot = True
+
+    filterRadon = False
 
 
-    # ===== READ IN IMAGE ===== 
-    imgName = 'mcnutt.jpg'
+    # ===== READ IN IMAGE =====
+    if len(sys.argv) < 2 or not os.path.exists(f'./input/{sys.argv[1]}'):
+        print("\033[31mPlease input the name of an image in './input'\033[0m")
+        exit()
+    
+    imgName = sys.argv[1] # first passed in parameter
 
     print(f"\nLoading image ({imgName})...")
 
@@ -77,6 +92,12 @@ if __name__ == '__main__':
     radonG = radon(paddedG, theta=theta)
     print("  \033[34m Blue...\033[0m")
     radonB = radon(paddedB, theta=theta)
+
+
+    # Experimental optional filtering step
+    if filterRadon:
+        radonR, radonG, radonB = radonFilter(radonR, radonG, radonB)
+
 
     # Mix sinograms back together
     radonMixed = np.zeros((radonR.shape[0], radonR.shape[1], 3))
@@ -180,85 +201,96 @@ if __name__ == '__main__':
 
     # ===== DISPLAY =====
 
-    if showPlot:
+    # Colormaps for displaying
+    rcm = LinearSegmentedColormap.from_list('rcm', [(0, 0, 0), (1, 0, 0)], N=len(np.unique(r)))
+    gcm = LinearSegmentedColormap.from_list('gcm', [(0, 0, 0), (0, 1, 0)], N=len(np.unique(g)))
+    bcm = LinearSegmentedColormap.from_list('bcm', [(0, 0, 0), (0, 0, 1)], N=len(np.unique(b)))
 
-        # Colormaps for displaying
-        rcm = LinearSegmentedColormap.from_list('rcm', [(0, 0, 0), (1, 0, 0)], N=len(np.unique(r)))
-        gcm = LinearSegmentedColormap.from_list('gcm', [(0, 0, 0), (0, 1, 0)], N=len(np.unique(g)))
-        bcm = LinearSegmentedColormap.from_list('bcm', [(0, 0, 0), (0, 0, 1)], N=len(np.unique(b)))
+    Rrcm = LinearSegmentedColormap.from_list('Rrcm', [(0, 0, 0), (1, 0, 0)], N=len(np.unique(radonR)))
+    Rgcm = LinearSegmentedColormap.from_list('Rgcm', [(0, 0, 0), (0, 1, 0)], N=len(np.unique(radonG)))
+    Rbcm = LinearSegmentedColormap.from_list('Rbcm', [(0, 0, 0), (0, 0, 1)], N=len(np.unique(radonB)))
 
-        # Setting up plot
-        fig, ((axr,axg,axb,axim), (axRr,axRg,axRb,axRim), (axFBPr, axFBPg, axFBPb, axFBPim), (axERRr, axERRg, axERRb, axERRim)) = plt.subplots(4,4, figsize=(8, 8))
+    FBPrcm = LinearSegmentedColormap.from_list('FBPrcm', [(0, 0, 0), (1, 0, 0)], N=len(np.unique(reconR)))
+    FBPgcm = LinearSegmentedColormap.from_list('FBPgcm', [(0, 0, 0), (0, 1, 0)], N=len(np.unique(reconG)))
+    FBPbcm = LinearSegmentedColormap.from_list('FBPbcm', [(0, 0, 0), (0, 0, 1)], N=len(np.unique(reconB)))
 
-        fig.suptitle(f'RGB Image Reconstruction by FBP ({imgName})')
+    ERRrcm = LinearSegmentedColormap.from_list('ERRrcm', [(0, 0, 0), (1, 0, 0)], N=len(np.unique(errorR)))
+    ERRgcm = LinearSegmentedColormap.from_list('ERRgcm', [(0, 0, 0), (0, 1, 0)], N=len(np.unique(errorG)))
+    ERRbcm = LinearSegmentedColormap.from_list('ERRbcm', [(0, 0, 0), (0, 0, 1)], N=len(np.unique(errorB)))
 
-        axr.set_title('Red Channel')
-        axg.set_title('Green Channel')
-        axb.set_title('Blue Channel')
-        axim.set_title('Mixed')
+    # Setting up plot
+    fig, ((axr,axg,axb,axim), (axRr,axRg,axRb,axRim), (axFBPr, axFBPg, axFBPb, axFBPim), (axERRr, axERRg, axERRb, axERRim)) = plt.subplots(4,4, figsize=(8, 8))
 
-        axr.text(-r.shape[0] / 10, r.shape[1] / 2, 'Original', fontsize='large', rotation='vertical', horizontalalignment='center', verticalalignment='center')
-        axRr.text(-radonR.shape[0] / 10, radonR.shape[1] / 2, 'Sinograms', fontsize='large', rotation='vertical', horizontalalignment='center', verticalalignment='center')
-        axFBPr.text(-reconR.shape[0] / 10, reconR.shape[1] / 2, 'Reconstructions', fontsize='large', rotation='vertical', horizontalalignment='center', verticalalignment='center')
-        axERRr.text(-errorR.shape[0] / 10, errorR.shape[1] / 2, 'Error', fontsize='large', rotation='vertical', horizontalalignment='center', verticalalignment='center')
+    fig.suptitle(f'RGB Image Reconstruction by FBP ({imgName})')
 
-        axr.set_axis_off()
-        axg.set_axis_off()
-        axb.set_axis_off()
-        axim.set_axis_off()
+    axr.set_title('Red Channel')
+    axg.set_title('Green Channel')
+    axb.set_title('Blue Channel')
+    axim.set_title('Mixed')
 
-        axRr.set_axis_off()
-        axRg.set_axis_off()
-        axRb.set_axis_off()
-        axRim.set_axis_off()
+    axr.text(-r.shape[0] / 10, r.shape[1] / 2, 'Original', fontsize='large', rotation='vertical', horizontalalignment='center', verticalalignment='center')
+    axRr.text(-radonR.shape[0] / 10, radonR.shape[1] / 2, 'Sinograms', fontsize='large', rotation='vertical', horizontalalignment='center', verticalalignment='center')
+    axFBPr.text(-reconR.shape[0] / 10, reconR.shape[1] / 2, 'Reconstructions', fontsize='large', rotation='vertical', horizontalalignment='center', verticalalignment='center')
+    axERRr.text(-errorR.shape[0] / 10, errorR.shape[1] / 2, 'Error', fontsize='large', rotation='vertical', horizontalalignment='center', verticalalignment='center')
 
-        axFBPr.set_axis_off()
-        axFBPg.set_axis_off()
-        axFBPb.set_axis_off()
-        axFBPim.set_axis_off()
+    axr.set_axis_off()
+    axg.set_axis_off()
+    axb.set_axis_off()
+    axim.set_axis_off()
 
-        axERRr.set_axis_off()
-        axERRg.set_axis_off()
-        axERRb.set_axis_off()
-        axERRim.set_axis_off()
+    axRr.set_axis_off()
+    axRg.set_axis_off()
+    axRb.set_axis_off()
+    axRim.set_axis_off()
+
+    axFBPr.set_axis_off()
+    axFBPg.set_axis_off()
+    axFBPb.set_axis_off()
+    axFBPim.set_axis_off()
+
+    axERRr.set_axis_off()
+    axERRg.set_axis_off()
+    axERRb.set_axis_off()
+    axERRim.set_axis_off()
+    
+
+    # Plot all the stuff!
+
+    # Plot image channels
+    axr.imshow(r, cmap=rcm)
+    axg.imshow(g, cmap=gcm)
+    axb.imshow(b, cmap=bcm)
+    axim.imshow(im)
+
+    # Plot radon channels
+    axRr.imshow(radonR, cmap=Rrcm)
+    axRg.imshow(radonG, cmap=Rgcm)
+    axRb.imshow(radonB, cmap=Rbcm)
+    axRim.imshow(radonMixed)
+
+    # Plot FBP channels
+    axFBPr.imshow(reconR, cmap=FBPrcm)
+    axFBPg.imshow(reconG, cmap=FBPgcm)
+    axFBPb.imshow(reconB, cmap=FBPbcm)
+    axFBPim.imshow(reconMixed)
+
+    # Plot error channels
+    axERRr.imshow(errorR, cmap=ERRrcm)
+    axERRg.imshow(errorG, cmap=ERRgcm)
+    axERRb.imshow(errorB, cmap=ERRbcm)
+    axERRim.imshow(errorMixed)
+
+    plt.subplots_adjust(0.1, 0.012, 0.9, 0.9, 0.036, 0)
+
+    # Save plot
+    if savePlot:
+        dir = f'./processed/{imgName}'
+        if not os.path.exists(dir):
+            os.mkdir(dir)
         
-
-        # Plot all the stuff!
-
-        # Plot image channels
-        axr.imshow(r, cmap=rcm)
-        axg.imshow(g, cmap=gcm)
-        axb.imshow(b, cmap=bcm)
-        axim.imshow(im)
-
-        # Plot radon channels
-        axRr.imshow(radonR, cmap=rcm)
-        axRg.imshow(radonG, cmap=gcm)
-        axRb.imshow(radonB, cmap=bcm)
-        axRim.imshow(radonMixed)
-
-        # Plot FBP channels
-        axFBPr.imshow(reconR, cmap=rcm)
-        axFBPg.imshow(reconG, cmap=gcm)
-        axFBPb.imshow(reconB, cmap=bcm)
-        axFBPim.imshow(reconMixed)
-
-        # Plot error channels
-        axERRr.imshow(errorR, cmap=rcm)
-        axERRg.imshow(errorG, cmap=gcm)
-        axERRb.imshow(errorB, cmap=bcm)
-        axERRim.imshow(errorMixed)
-
-        plt.subplots_adjust(0.1, 0.012, 0.9, 0.9, 0.036, 0)
-
-        # Save plot
-        if savePlot:
-            dir = f'./processed/{imgName}'
-            if not os.path.exists(dir):
-                os.mkdir(dir)
-            
-            plt.savefig(f'{dir}/{imgName}_processed.png')
-
+        plt.savefig(f'{dir}/{imgName}_processed.svg', format='svg')
+    
+    if showPlot:
         # Show the plot
         plt.show()
 

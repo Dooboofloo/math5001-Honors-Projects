@@ -1,0 +1,1 @@
+flipping sinogram upside down causes reconstructed image to also flip upside down, but seriously messes with the coloring. Makes it look like the picture was taken on film
