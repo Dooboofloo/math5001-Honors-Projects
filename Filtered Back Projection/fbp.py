@@ -68,14 +68,14 @@ def fbp(radon):
 
 if __name__ == '__main__':
     # Load original image (for comparison)
-    inputImg = np.loadtxt('./image/squareImage.csv', delimiter=',')
+    inputImg = np.loadtxt('./image/SheppLoganImage100x100.csv', delimiter=',')
     # inputImg = np.loadtxt('./image/SmileImage.csv', delimiter=',')
 
     # Normalize it
     inputImg = (inputImg - inputImg.min()) / (inputImg.max() - inputImg.min())
 
     # Load previously computed radon data
-    inputRadon = np.loadtxt('./radon/squareRadon.csv', delimiter=',')
+    inputRadon = np.loadtxt('./radon/SheppLoganRadon90x100.csv', delimiter=',')
     # inputRadon = np.loadtxt('./radon/SmileRadon.csv', delimiter=',')
 
 

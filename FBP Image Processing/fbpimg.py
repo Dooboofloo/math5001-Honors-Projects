@@ -30,25 +30,70 @@ def toColor(input, color):
 
 # Method for playing with filters
 def radonFilter(r, g, b):
-    r = np.flipud(r)
-    g = np.flipud(g)
-    b = np.flipud(b)
-            
+    # Randomly shuffle column data
+    # r = r[:, np.random.permutation(r.shape[1])]
+    # g = g[:, np.random.permutation(g.shape[1])]
+    # b = b[:, np.random.permutation(b.shape[1])]
+
+    # Reflect sinograms vertically
+    # r = np.flipud(r)
+    # g = np.flipud(g)
+    # b = np.flipud(b)
+
+    # In each channel, shift every row over by an amount from 0 to 3 pixels
+    # for i in range(r.shape[0]):
+    #     r[i] = np.roll(r[i], i % 4)
+    # for i in range(g.shape[0]):
+    #     g[i] = np.roll(g[i], i % 4)
+    # for i in range(b.shape[0]):
+    #     b[i] = np.roll(b[i], i % 4)
+
+    width = 0.65
+    halfMaskWidth = int(r.shape[0] * width / 2)
+    startIndex = (r.shape[0] // 2) - halfMaskWidth
+    endIndex = (r.shape[0] // 2) + halfMaskWidth
+
+    r = r.T
+    g = g.T
+    b = b.T
+
+    for i in range(r.shape[0]):
+        for j in range(r.shape[1]):
+            if j < startIndex or j > endIndex:
+                r[i][j] = 0
+                g[i][j] = 0
+                b[i][j] = 0
+    
+    r = r.T
+    g = g.T
+    b = b.T
+    
+
+
+    # thresh = 0.6
+    # rThreshVal = ((r.max() - r.min()) * (1 - thresh)) + r.min()
+    # gThreshVal = ((g.max() - g.min()) * (1 - thresh)) + g.min()
+    # bThreshVal = ((b.max() - b.min()) * (1 - thresh)) + b.min()
+    # r = np.asarray(r > rThreshVal) * r
+    # g = np.asarray(g > gThreshVal) * g
+    # b = np.asarray(b > bThreshVal) * b
+
+
     return r, g, b
 
-# All images in ./input/ are 3024x3024
+
 
 if __name__ == '__main__':
     os.system('color')
 
-    RESOLUTION = 128
+    RESOLUTION = 512
 
     # Options
-    saveImages = False
-    savePlot = False
+    saveImages = True
+    savePlot = True
     showPlot = True
 
-    filterRadon = True
+    filterRadon = False
 
 
     # ===== READ IN IMAGE =====
@@ -71,12 +116,12 @@ if __name__ == '__main__':
     g = im[:,:,1]
     b = im[:,:,2]
 
-    # 0.43 ≈ sqrt(2) - 1... plus a bit
+    # 0.43 ≈ (sqrt(2) - 1)... plus a bit or the corners pick up artifacts
     # the entire image must be within the imaging circle
     paddingWidth = int((im.shape[1] / 2) * 0.43)
 
 
-    # Pad RGB channels for radon transform (does not effect final resolution)
+    # Pad RGB channels for radon transform (does not affect final resolution)
     paddedR = np.pad(r, paddingWidth, mode='constant')
     paddedG = np.pad(g, paddingWidth, mode='constant')
     paddedB = np.pad(b, paddingWidth, mode='constant')
